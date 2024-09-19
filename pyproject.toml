@@ -1,0 +1,25 @@
+[project]
+name = "genart-visions"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "pygame~=2.4",
+    "p5>=0.8.4",
+    "perlin-noise>=1.13",
+    "jurigged>=0.5.8",
+    "pygame-hotreload>=0.0.32",
+    "reloadium>=1.5.1",
+    "pyautogui>=0.9.54",
+    "keyboard>=0.13.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+executionEnvironments = [{root = "src"}, {root = "src/genart_visions"}]
+include = ["src/genart_visions"]
+extraPaths = ["src/genart_visions"]
