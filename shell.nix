@@ -124,5 +124,6 @@ stdenv.mkDerivation rec {
   shellHook = ''
     export LD_LIBRARY_PATH="${lib.makeLibraryPath buildInputs}:$LD_LIBRARY_PATH"
     export LD_LIBRARY_PATH="${stdenv.cc.cc.lib.outPath}/lib:$LD_LIBRARY_PATH"
+    . .venv/bin/activate
   '';
 }
