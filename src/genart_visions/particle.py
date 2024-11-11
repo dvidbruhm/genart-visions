@@ -1,9 +1,20 @@
-from utils import Vec2D, get_random_pos
 import pygame
-import pygame.gfxdraw as gfxdraw
+from pygame import gfxdraw
+from utils import Vec2D, get_random_pos
+
 
 class Particle:
-    def __init__(self, pos: Vec2D, speed: float, size: float, trail_len: int, height: int, width: int):
+    def __init__(
+        self,
+        pos: Vec2D,
+        speed: float,
+        size: float,
+        trail_len: int,
+        height: int,
+        width: int,
+        color: pygame.Color,
+        varying_width: bool = True,
+    ):
         self.pos = pos
         self.speed = speed
         self.size = size
@@ -12,22 +23,31 @@ class Particle:
         self.active = True
         self.height = height
         self.width = width
+        self.color = color
+        self.varying_width = varying_width
+        self.add_trail()
 
     def display(self, screen):
-        if len(self.trail) <= 1:
+        if len(self.trail) == 0:
             return
-        # pygame.draw.circle(screen, pygame.Color(255, 255, 255), (self.pos.x, self.pos.y), self.size)
-        pygame.draw.lines(screen, "white", False, [tuple(p) for p in self.trail])
-        gfxdraw.filled_circle(screen, int(self.pos.x), int(self.pos.y), int(self.size), (255, 255, 255))
-        # gfxdraw.aacircle(screen, int(self.pos.x), int(self.pos.y), int(self.size), (255, 255, 255))
+
+        # pyglet.shapes.Circle(self.pos.x, self.pos.y, self.size, color=(255, 255, 255), batch=screen)
+        # return
+
+        for i, posi in enumerate(self.trail, start=1):
+            p_size = (i / len(self.trail)) * self.size
+            # pygame.draw.circle(screen, self.color, (posi.x, posi.y), p_size)
+            gfxdraw.aacircle(screen, int(posi.x), int(posi.y), int(p_size), self.color)
+            gfxdraw.filled_circle(screen, int(posi.x), int(posi.y), int(p_size), self.color)
+        # pygame.draw.lines(screen, "white", False, [tuple(p) for p in self.trail])
 
     def update(self, flowfield):
         if not self.active:
             return
-        self.add_trail()
         field_value = flowfield.get_value_at_pixel(self.pos)
         self.pos += field_value * self.speed
         self.wrap()
+        self.add_trail()
 
     def wrap(self):
         if 0 <= self.pos.x < self.width and 0 <= self.pos.y < self.height:

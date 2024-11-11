@@ -13,6 +13,7 @@ dependencies = [
     "reloadium>=1.5.1",
     "pyautogui>=0.9.54",
     "keyboard>=0.13.5",
+    "pyglet>=2.0.18",
 ]
 
 [build-system]

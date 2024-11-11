@@ -1,5 +1,18 @@
 import math
 import random
+import pygame
+
+
+def sketch_events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            return True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+            pygame.quit()
+            exit()
 
 
 class Vec2D:

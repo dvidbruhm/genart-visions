@@ -1,27 +1,34 @@
-# Example file showing a basic pygame "game loop"
-import os
+import flowfield
+import particle
 import pygame
-import pygame.gfxdraw as gfxdraw
-from utils import get_random_pos
-import random
-import perlin_noise
-import math
-from flowfield import Flowfield
-from particle import Particle
-from sketch import Sketch
+import pyglet
+import sketch
+import utils
 
 
-class Vision1(Sketch):
-    def __init__(self, n_part=100, flowfield_res=10):
+class Vision1(sketch.Sketch):
+    def __init__(self, screen, n_part=100, flowfield_res=10):
         super(Vision1, self).__init__()
-        width, height = pygame.display.get_surface().get_size()
-        self.flowfield = Flowfield(flowfield_res, height, width)
+        width, height = screen.get_size()
+        self.flowfield = flowfield.Flowfield(flowfield_res, height, width)
         self.flowfield.create_field()
-        self.particles = [Particle(get_random_pos(width, height), 2, 1, 3, height, width) for _ in range(n_part)]
+        self.particles = [
+            particle.Particle(
+                utils.get_random_pos(width, height),
+                2,
+                5,
+                30,
+                height,
+                width,
+                pygame.Color(200, 192, 147),
+            )
+            for _ in range(n_part)
+        ]
+        self.batch = pyglet.graphics.Batch()
 
     def draw(self, screen):
-        screen.fill(0)
-        self.flowfield.display(screen)
+        screen.fill((31, 31, 40))
+        # self.flowfield.display(screen)
         for p in self.particles:
             p.display(screen)
 
@@ -35,22 +42,33 @@ class Vision1(Sketch):
         #         pass
         pass
 
+
 reload = False
-def main(clock, screen):
+
+
+def main(clock, screen: pygame.Surface):
     global reload
-    sketch = Vision1(1000, 10)
-    #os.system("xte 'keydown Alt_L' 'keydown Tab' 'keyup Alt_L' 'keyup Tab'")
+    translated_screen = pygame.Surface((1000, 1000))
+    screen.fill(pygame.Color(22, 22, 29))
+    sketch = Vision1(translated_screen, 100, 10)
     while not reload:
         clock.tick(60)
-            
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                reload = True
+
+        reload = utils.sketch_events()
 
         sketch.handle_events(pygame.event.get())
         sketch.update()
-        sketch.draw(screen)
+        sketch.draw(translated_screen)
+
+        screen.blit(translated_screen, (140, 220))
         pygame.display.flip()
+
+
+def main2():
+    batch = pyglet.graphics.Batch()
+    sketch = Vision1(batch)
+    pyglet.app.run()
+
+
+if __name__ == "__main__":
+    main2()

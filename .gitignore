@@ -1,2 +1,4 @@
 .envrc
 .direnv
+src/genart_visions/__pycache__
+*.py[cod]
