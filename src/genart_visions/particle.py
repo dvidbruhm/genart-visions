@@ -1,20 +1,13 @@
-import pygame
-from pygame import gfxdraw
+import os
+
+from py5 import Sketch
 from utils import Vec2D, get_random_pos
+
+os.environ["JAVA_HOME"] = "C:\Program Files\Microsoft\jdk-21.0.5.11-hotspot"
 
 
 class Particle:
-    def __init__(
-        self,
-        pos: Vec2D,
-        speed: float,
-        size: float,
-        trail_len: int,
-        height: int,
-        width: int,
-        color: pygame.Color,
-        varying_width: bool = True,
-    ):
+    def __init__(self, pos: Vec2D, speed: float, size: float, trail_len: int, height: int, width: int, color, varying_width: bool = True):
         self.pos = pos
         self.speed = speed
         self.size = size
@@ -27,19 +20,20 @@ class Particle:
         self.varying_width = varying_width
         self.add_trail()
 
-    def display(self, screen):
-        if len(self.trail) == 0:
+    def display(self, sketch: Sketch):
+        if len(self.trail) <= 1:
             return
 
-        # pyglet.shapes.Circle(self.pos.x, self.pos.y, self.size, color=(255, 255, 255), batch=screen)
-        # return
-
-        for i, posi in enumerate(self.trail, start=1):
-            p_size = (i / len(self.trail)) * self.size
-            # pygame.draw.circle(screen, self.color, (posi.x, posi.y), p_size)
-            gfxdraw.aacircle(screen, int(posi.x), int(posi.y), int(p_size), self.color)
-            gfxdraw.filled_circle(screen, int(posi.x), int(posi.y), int(p_size), self.color)
-        # pygame.draw.lines(screen, "white", False, [tuple(p) for p in self.trail])
+        sketch.fill(255, 255, 255)
+        sketch.stroke(255, 255, 255)
+        size = self.size
+        for i in range(len(self.trail) - 1):
+            current_pos, next_pos = self.trail[i], self.trail[i + 1]
+            if self.varying_width:
+                size = ((i + 1) / len(self.trail)) * self.size
+            # sketch.circle(posi.x, posi.y, size)
+            sketch.stroke_weight(size)
+            sketch.line(current_pos.x, current_pos.y, next_pos.x, next_pos.y)
 
     def update(self, flowfield):
         if not self.active:

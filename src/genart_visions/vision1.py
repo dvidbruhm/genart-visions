@@ -1,74 +1,59 @@
 import flowfield
 import particle
-import pygame
-import pyglet
-import sketch
 import utils
+import vision
+from py5 import Sketch
 
 
-class Vision1(sketch.Sketch):
-    def __init__(self, screen, n_part=100, flowfield_res=10):
-        super(Vision1, self).__init__()
-        width, height = screen.get_size()
-        self.flowfield = flowfield.Flowfield(flowfield_res, height, width)
-        self.flowfield.create_field()
+class Vision1(vision.Vision):
+    def __init__(self, width: int, height: int, steps: int = 0, n_part: int = 100, flowfield_res: int = 10) -> None:
+        super().__init__()
+        self.flowfield_res = flowfield_res
+        self.n_part = n_part
+        self.width = width
+        self.height = height
+        self.steps = steps
+
+    def setup(self, sketch: Sketch):
+        self.flowfield = flowfield.Flowfield(sketch, self.flowfield_res, self.width, self.height)
+        self.flowfield.create_field(sketch, 0.03)
         self.particles = [
-            particle.Particle(
-                utils.get_random_pos(width, height),
-                2,
-                5,
-                30,
-                height,
-                width,
-                pygame.Color(200, 192, 147),
-            )
-            for _ in range(n_part)
+            particle.Particle(utils.get_random_pos(self.width, self.height), 3, 2, 10, self.height, self.width, (200, 192, 147), varying_width=False)
+            for _ in range(self.n_part)
         ]
-        self.batch = pyglet.graphics.Batch()
-
-    def draw(self, screen):
-        screen.fill((31, 31, 40))
-        # self.flowfield.display(screen)
-        for p in self.particles:
-            p.display(screen)
+        sketch.no_stroke()
+        sketch.rect_mode(sketch.CENTER)
+        sketch.loop()
 
     def update(self):
         for p in self.particles:
             p.update(self.flowfield)
 
-    def handle_events(self, events):
-        # for e in events:
-        #     if e.type == KEYDOWN and e.key == K_SPACE:
-        #         pass
-        pass
+    def draw(self, sketch: Sketch):
+        sketch.background(22, 22, 29)
+        sketch.fill(31, 31, 40)
+        sketch.no_stroke()
+        sketch.rect(sketch.width / 2, sketch.height / 2, self.width, self.height)
+        sketch.translate(140, 220)
+
+        # self.flowfield.create_field(sketch, 0.04)
+        # self.flowfield.display(sketch)
+
+        for p in self.particles:
+            p.display(sketch)
+
+        sketch.translate(500, 500)
+        sketch.begin_shape()
+        sketch.begin_contour()
+        sketch.vertex(-200, -200)
+        sketch.vertex(-200, 200)
+        sketch.vertex(200, 200)
+        sketch.vertex(200, -200)
+        sketch.end_contour()
+        sketch.end_shape(sketch.CLOSE)
+
+        if self.steps != 0 and sketch.frame_count > self.steps:
+            sketch.no_loop()
 
 
-reload = False
-
-
-def main(clock, screen: pygame.Surface):
-    global reload
-    translated_screen = pygame.Surface((1000, 1000))
-    screen.fill(pygame.Color(22, 22, 29))
-    sketch = Vision1(translated_screen, 100, 10)
-    while not reload:
-        clock.tick(60)
-
-        reload = utils.sketch_events()
-
-        sketch.handle_events(pygame.event.get())
-        sketch.update()
-        sketch.draw(translated_screen)
-
-        screen.blit(translated_screen, (140, 220))
-        pygame.display.flip()
-
-
-def main2():
-    batch = pyglet.graphics.Batch()
-    sketch = Vision1(batch)
-    pyglet.app.run()
-
-
-if __name__ == "__main__":
-    main2()
+viz = Vision1(1000, 1000, steps=0, n_part=500, flowfield_res=5)

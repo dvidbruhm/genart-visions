@@ -1,53 +1,64 @@
-import importlib
-import traceback
-import os
-from pathlib import Path
-import pygame
 import argparse
-from types import ModuleType
+import importlib
+import os
 import sys
-import glob
-import ctypes
+import traceback
+from pathlib import Path
 
-ctypes.windll.user32.SetProcessDPIAware()
+os.environ["JAVA_HOME"] = "C:\Program Files\Microsoft\jdk-21.0.5.11-hotspot"
+
+
+from py5 import Sketch
 
 parser = argparse.ArgumentParser()
 parser.add_argument("sketch_name")
 args = parser.parse_args()
 vision = importlib.import_module(args.sketch_name)
 
-has_error = False
-os.environ["SDL_VIDEO_WINDOW_POS"] = "%d,%d" % (0, 0)
-pygame.init()
-screen = pygame.display.set_mode((1280, 1440))
-clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 30, bold=True)
+
+class MySketch(Sketch):
+    def __init__(self):
+        super().__init__()
+        self.running = True
+
+    def settings(self):
+        self.size(1280, 1440)
+
+    def setup(self):
+        surface = self.get_surface()
+        surface.set_location(0, 0)
+        vision.viz.setup(self)
+
+    def predraw_update(self):
+        vision.viz.update()
+
+    def draw(self):
+        vision.viz.draw(self)
+
+    def key_pressed(self):
+        if self.key == "r":
+            try:
+                for path in Path(__file__).parent.glob("*"):
+                    if any([s in path.name for s in ["__pycache__", "main", "test1"]]):
+                        continue
+                    mod_name = path.name.split(".")[0]
+                    if mod_name in sys.modules.keys():
+                        importlib.reload(sys.modules[mod_name])
+
+                self.frame_count = 0
+                vision.viz.setup(self)
+            except Exception:
+                print(traceback.format_exc())
+        if self.key == "q":
+            self.exit_sketch()
+        if self.key == "s":
+            if self.running:
+                self.no_loop()
+                self.running = False
+            else:
+                self.loop()
+                self.running = True
 
 
-def error_msg(screen):
-    screen.fill((100, 50, 50))
-    msg = font.render("Error - Reloading every 10 sec.", True, "gray")
-    width, height = pygame.display.get_surface().get_size()
-    screen.blit(msg, msg.get_rect(center=(width / 2, height / 2)))
-    pygame.display.flip()
-
-
-while True:
-    try:
-        vision.main(clock, screen)
-        has_error = False
-    except Exception as e:
-        has_error = True
-        error_msg(screen)
-        print(traceback.format_exc())
-        input("")
-
-    if vision.reload or has_error:
-        for path in Path(__file__).parent.glob("*"):
-            if any([s in path.name for s in ["__pycache__", "main"]]):
-                continue
-            mod_name = path.name.split(".")[0]
-            if mod_name in sys.modules.keys():
-                importlib.reload(sys.modules[mod_name])
-    elif not has_error:
-        exit()
+test = MySketch()
+test.run_sketch()
