@@ -1,38 +1,36 @@
 import math
-import random
+
+from flowfield_type import FieldType
 
 # from perlin_noise import PerlinNoise
 from py5 import Sketch
-from utils import Vec2D, angle_to_vec, map_from_to
+from utils import Vec2D
 
 
 class Flowfield:
-    def __init__(self, sketch: Sketch, resolution: int, width: int, height: int):
+    def __init__(self, sketch: Sketch, resolution: int, width: int, height: int, field_type: FieldType):
         self.resolution = resolution
         self.rows = math.floor(height / resolution) + 1
         self.cols = math.floor(width / resolution) + 1
         self.field = [[Vec2D.new()] * self.rows for _ in range(self.cols)]
-        self.seed = random.randint(-10, 10)
-        sketch.os_noise_seed(self.seed)
+        self.width = sketch.width
+        self.height = sketch.height
+        self.field_type = field_type
+        self.sketch = sketch
 
-    def create_field(self, sketch: Sketch, noise_scale: float = 0.01):
+    def display(self):
+        self.sketch.stroke(127, 127, 127, 127)
+        self.sketch.stroke_weight(1)
+
         for i in range(self.cols):
             for j in range(self.rows):
-                value = sketch.os_noise(i * noise_scale, j * noise_scale, sketch.frame_count * noise_scale * 0.02)
-                angle = map_from_to(value, 0, 1, 0, 2 * math.pi)
-                self.field[i][j] = angle_to_vec(angle)
-
-    def display(self, sketch: Sketch):
-        sketch.stroke(127, 127, 127, 127)
-        for i in range(self.cols):
-            for j in range(self.rows):
-                x = i * self.resolution
-                y = j * self.resolution
-                x2 = x + self.field[i][j].x * self.resolution
-                y2 = y + self.field[i][j].y * self.resolution
-                sketch.line(x, y, x2, y2)
+                pos = Vec2D(i, j) * self.resolution - Vec2D(1, 1)
+                value = self.field_type.get_value_at_pixel(pos, self)
+                pos2 = pos + (value * self.resolution)
+                self.sketch.stroke_weight(1)
+                self.sketch.line(pos.x, pos.y, pos2.x, pos2.y)
+                self.sketch.stroke_weight(3)
+                self.sketch.point(pos2.x, pos2.y)
 
     def get_value_at_pixel(self, pos: Vec2D) -> Vec2D:
-        i = math.floor(pos.x / self.resolution)
-        j = math.floor(pos.y / self.resolution)
-        return self.field[i][j]
+        return self.field_type.get_value_at_pixel(pos, self)

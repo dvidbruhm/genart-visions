@@ -51,12 +51,25 @@ class Vec2D:
     def mag(self):
         return math.sqrt(self.x**2 + self.y**2)
 
+    def dist(self, other):
+        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+
     def dot(self, other):
         return self.x * other.x + self.y * other.y
 
     def apply(self, func):
         "Apply a function on both the x and y component"
         return Vec2D(func(self.x), func(self.y))
+
+    def rescale(self, magnitude: float):
+        if self.mag() <= 0.01:
+            return
+        self.x *= magnitude / self.mag()
+        self.y *= magnitude / self.mag()
+
+    def constrain(self, magnitude: float):
+        if self.mag() > magnitude:
+            self.rescale(magnitude)
 
     @staticmethod
     def new():
@@ -73,5 +86,11 @@ def map_from_to(x, a, b, c, d):
     return y
 
 
-def get_random_pos(width, height) -> Vec2D:
+def get_random_1d_pos(start: Vec2D, end: Vec2D) -> Vec2D:
+    interp = random.random()
+    point = start + end * interp
+    return point
+
+
+def get_random_2d_pos(width: float, height: float) -> Vec2D:
     return Vec2D(random.random() * width, random.random() * height)

@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.10,<3.11"
 dependencies = [
     "pygame~=2.4",
-    "perlin-noise>=1.13",
     "py5>=0.10.3a1",
+    "typing-extensions>=4.12.2",
 ]
 
 [build-system]

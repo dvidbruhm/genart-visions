@@ -1,0 +1,5 @@
+TODO:
+
+[ ] - Refactor file layout to easily separate sketches (visions) by folder (eg. src/genart_visions/vision[1,2,3]/...)
+[ ] - Make it so the genart library is outside this project and can be imported
+[ ] - Save an output of the sketch after each or so run with well organized names

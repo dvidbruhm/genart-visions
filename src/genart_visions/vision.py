@@ -8,7 +8,7 @@ class Vision(object):
     def draw(self, sketch: Sketch):
         raise NotImplementedError
 
-    def update(self):
+    def update(self, sketch: Sketch):
         raise NotImplementedError
 
     def handle_events(self, sketch: Sketch):

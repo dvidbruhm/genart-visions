@@ -23,6 +23,7 @@ class MySketch(Sketch):
 
     def settings(self):
         self.size(1280, 1440)
+        self.smooth(8)
 
     def setup(self):
         surface = self.get_surface()
@@ -30,7 +31,7 @@ class MySketch(Sketch):
         vision.viz.setup(self)
 
     def predraw_update(self):
-        vision.viz.update()
+        vision.viz.update(self)
 
     def draw(self):
         vision.viz.draw(self)
@@ -38,10 +39,10 @@ class MySketch(Sketch):
     def key_pressed(self):
         if self.key == "r":
             try:
-                for path in Path(__file__).parent.glob("*"):
+                for path in Path(__file__).parent.rglob("**/*.py"):
                     if any([s in path.name for s in ["__pycache__", "main", "test1"]]):
                         continue
-                    mod_name = path.name.split(".")[0]
+                    mod_name = str(path.relative_to(Path(__file__).parent)).split(".")[0].replace("\\", ".").replace("/", ".")
                     if mod_name in sys.modules.keys():
                         importlib.reload(sys.modules[mod_name])
 
@@ -58,7 +59,10 @@ class MySketch(Sketch):
             else:
                 self.loop()
                 self.running = True
+        if self.key == "c":
+            vision.viz.save_sketch(self)
 
 
 test = MySketch()
 test.run_sketch()
+test.window_move(0, 0)
